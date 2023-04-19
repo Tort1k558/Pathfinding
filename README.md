@@ -2,15 +2,14 @@
 
 Pathfinding is a program that visualizes pathfinding.
 
+# Example
+![](images/example.png)
+
 Supports pathfinding such as:
 * BFS
 * DFS(In the future)
 * Dijkstra's algorithm(In the future)
 * A\* algorithm(In the future)
-
-# TODO
-* Make visualization of search algorithms step by step
-* Add more pathfinding algorithms
 
 # Control
 Mouse:
@@ -22,5 +21,8 @@ Keyboard:
 * E-Put the end point of the path
 * C-Clear the entire field
 * X-Fill in the entire field in black
-# Example
-![](images/example.png)
+
+
+# TODO
+* Make visualization of search algorithms step by step
+* Add more pathfinding algorithms

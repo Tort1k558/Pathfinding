@@ -3,6 +3,9 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
 from PyQt6.QtCore import Qt, QRect
 from PyQt6.QtGui import QPainter, QCursor
 
+# TODO
+# Size of windows
+
 class GridWidget(QWidget):
     def __init__(self, num_cells):
         super().__init__()
@@ -11,7 +14,7 @@ class GridWidget(QWidget):
         self.cells = [['white' for _ in range(self.num_cells)] for _ in range(self.num_cells)]
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self.setFixedSize(800, 800)
+        self.setFixedSize(900, 900)
         self.start = list()
         self.end = list()
         self.graph = dict()
@@ -35,8 +38,6 @@ class GridWidget(QWidget):
                     up = []
 
                 self.graph[str(i) + ',' + str(k)] = [left, right, down, up]
-
-        print(self.graph)
 
     def resizeEvent(self, event):
         self.cell_size = min(self.width() // self.num_cells, self.height() // self.num_cells)
@@ -205,7 +206,7 @@ class MainWindow(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    num_cells = 40
+    num_cells = 200
 
     window = MainWindow(num_cells)
     window.show()
