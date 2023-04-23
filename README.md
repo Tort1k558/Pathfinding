@@ -7,7 +7,7 @@ Pathfinding is a program that visualizes pathfinding.
 
 Supports pathfinding such as:
 * BFS
-* DFS(In the future)
+* DFS
 * Dijkstra's algorithm(In the future)
 * A\* algorithm(In the future)
 
@@ -24,5 +24,5 @@ Keyboard:
 
 
 # TODO
-* Make visualization of search algorithms step by step
 * Add more pathfinding algorithms
+* Add the ability to create mazes

@@ -1,7 +1,10 @@
+import itertools
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget
-from PyQt6.QtCore import Qt, QRect
+from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QSizePolicy
+from PyQt6.QtCore import Qt, QRect, QTimer
 from PyQt6.QtGui import QPainter, QCursor
+import mainwindow as mw
+
 
 # TODO
 # Size of windows
@@ -11,15 +14,21 @@ class GridWidget(QWidget):
         super().__init__()
         self.num_cells = num_cells
         self.cell_size = 0
+        self.setObjectName('grid_widget')
         self.cells = [['white' for _ in range(self.num_cells)] for _ in range(self.num_cells)]
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self.setFixedSize(900, 900)
         self.start = list()
         self.end = list()
         self.graph = dict()
         self.prevPath = list()
-
+        self.path = list()
+        self.all_ways = list()
+        self.timer = QTimer()
+        self.step_iter = None
+        self.visualisation = False
+        self.delay = 10
+        self.algorithm = 'BFS'
         # init graph
         for i in range(self.num_cells):
             for k in range(self.num_cells):
@@ -121,10 +130,25 @@ class GridWidget(QWidget):
             self.cells[x][y] = 'green'
             self.update()
 
-        # BFS
         if event.key() == Qt.Key.Key_B:
-            path = self.bfs(str(self.start[0]) + ',' + str(self.start[1]), str(self.end[0]) + ',' + str(self.end[1]))
-            self.paint_path(path)
+            self.all_ways.clear()
+            if len(self.start) == 2 and len(self.end) == 2:
+                if self.cells[self.start[0]][self.start[1]] == 'red' \
+                        and self.cells[self.end[0]][self.end[1]] == 'green':
+                    if self.algorithm == 'BFS':
+                        self.path = self.bfs(str(self.start[0]) + ',' + str(self.start[1]),
+                                        str(self.end[0]) + ',' + str(self.end[1]))
+                    elif self.algorithm == 'DFS':
+                        self.path = self.dfs(str(self.start[0]) + ',' + str(self.start[1]),
+                                        str(self.end[0]) + ',' + str(self.end[1]))
+
+                    if (len(self.all_ways) != 0 and self.visualisation):
+                        self.timer.setInterval(self.delay)
+                        self.timer.timeout.connect(self.paint_step)
+                        self.step_iter = self.step_generator().__iter__()
+                        self.timer.start()
+                    else:
+                        self.paint_path(self.path)
         # Clear and fill canvas
         if event.key() == Qt.Key.Key_C:
             self.clear_canvas()
@@ -148,6 +172,34 @@ class GridWidget(QWidget):
                 self.end = list()
                 self.prevPath = list()
                 self.update()
+
+    def clear_cells(self, cells):
+        for cell in cells:
+            x = int(cell.split(',')[0])
+            y = int(cell.split(',')[1])
+            if x == self.start[0] and y == self.start[1] or x == self.end[0] and y == self.end[1]:
+                continue
+            self.cells[x][y] = 'white'
+        self.update()
+
+    def step_generator(self):
+        for item in self.all_ways:
+            yield item
+
+    def paint_step(self):
+        if self.step_iter is not None:
+            step = next(self.step_iter)
+            if step == self.all_ways[-1]:
+                self.step_iter = None
+                self.timer.stop()
+                self.clear_cells(self.all_ways)
+                self.paint_path(self.path)
+            x = int(step.split(',')[0])
+            y = int(step.split(',')[1])
+            if (x == self.start[0] and y == self.start[1] or x == self.end[0] and y == self.end[1]):
+                return
+            self.cells[x][y] = 'yellow'
+            self.update()
 
     def paint_path(self, path):
         if self.prevPath:
@@ -177,10 +229,9 @@ class GridWidget(QWidget):
         while queue:
             path = queue.pop(0)
             node = path[-1]
-
             if node not in visited:
+                self.all_ways.append(node)
                 neighbours = self.graph[node]
-
                 for neighbour in neighbours:
                     if len(neighbour) == 0 or self.cells[neighbour[0]][neighbour[1]] == 'black':
                         continue
@@ -192,23 +243,65 @@ class GridWidget(QWidget):
 
                 visited.add(node)
 
-        return []
+        return None
 
+    def dfs(self, start, end):
+        if start == end or start is None or end is None:
+            return []
+        visited = set()
+        queue = [[start]]
+        for path in queue:
+            node = path[-1]
+            if node == end:
+                return path
+            if node not in visited:
+                self.all_ways.append(node)
+                neighbours = self.graph[node]
+                for neighbour in neighbours:
+                    if len(neighbour) == 0 or self.cells[neighbour[0]][neighbour[1]] == 'black':
+                        continue
+                    new_path = list(path)
+                    new_path.append(str(neighbour[0]) + ',' + str(neighbour[1]))
+                    index = queue.index(path)
+                    queue.insert(index+1,new_path)
+
+                visited.add(node)
+
+        return None
 
 class MainWindow(QMainWindow):
     def __init__(self, num_cells):
         super().__init__()
         self.grid_widget = GridWidget(num_cells)
-        self.setCentralWidget(self.grid_widget)
-        self.setWindowTitle("Pathfinding")
+        self.ui = mw.Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.ui.gridLayout_2.addWidget(self.grid_widget)
+        self.grid_widget.setStyleSheet("QWidget#grid_widget{color: FFF;}")
+        self.grid_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.grid_widget.setMinimumSize(600, 600)
+        self.ui.checkBox.stateChanged.connect(self.change_visualization)
+        self.ui.spinBox.valueChanged.connect(self.change_delay)
+        self.ui.comboBox.currentIndexChanged.connect(self.change_path_algorithm)
+        self.resize(self.minimumSize())
+        self.setFixedSize(self.size())
+
+    def change_path_algorithm(self, index):
+        self.grid_widget.algorithm = self.ui.comboBox.currentText()
+
+    def change_visualization(self, state):
+        self.grid_widget.visualisation = state
+
+    def change_delay(self, value):
+        self.grid_widget.delay = value
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    num_cells = 200
+    num_cells = 50
 
     window = MainWindow(num_cells)
+    window.setWindowTitle("Pathfinding")
     window.show()
 
     sys.exit(app.exec())
