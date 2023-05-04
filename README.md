@@ -8,7 +8,6 @@ Pathfinding is a program that visualizes pathfinding.
 Supports pathfinding such as:
 * BFS
 * DFS
-* Dijkstra's algorithm(In the future)
 * A\* algorithm(In the future)
 
 # Control
