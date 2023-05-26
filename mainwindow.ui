@@ -14,15 +14,14 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">background-color: #262626;
+background-image: linear-gradient(to bottom right, #1a1a1a, #333333);
+color: #fff;
+font-family: 'Helvetica Neue', sans-serif;</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
-    <string notr="true">background-color: #262626;
-background-image: linear-gradient(to bottom right, #1a1a1a, #333333);
-color: #fff;
-font-family: 'Helvetica Neue', sans-serif;
-</string>
+    <string notr="true"/>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
@@ -40,7 +39,7 @@ font-family: 'Helvetica Neue', sans-serif;
        <number>0</number>
       </property>
       <item>
-       <widget class="QComboBox" name="comboBox">
+       <widget class="QComboBox" name="comboBoxPath">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
           <horstretch>0</horstretch>
@@ -53,16 +52,17 @@ font-family: 'Helvetica Neue', sans-serif;
           <height>40</height>
          </size>
         </property>
+        <property name="maximumSize">
+         <size>
+          <width>160</width>
+          <height>40</height>
+         </size>
+        </property>
         <property name="styleSheet">
          <string notr="true">QComboBox{
 	font-size: 14px;
 }</string>
         </property>
-        <item>
-         <property name="text">
-          <string>Choose algorithm</string>
-         </property>
-        </item>
         <item>
          <property name="text">
           <string>BFS</string>
@@ -75,18 +75,49 @@ font-family: 'Helvetica Neue', sans-serif;
         </item>
         <item>
          <property name="text">
-          <string>Dijkstra's algorithm</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
           <string>A* algorithm</string>
          </property>
         </item>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="checkBox">
+       <widget class="QComboBox" name="comboBoxMazes">
+        <property name="minimumSize">
+         <size>
+          <width>160</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>160</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QComboBox{
+	font-size: 14px;
+}</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Randomized Prim's Algorithm</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Recursive Backtracking</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Kruskal's Algorithm</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxVisualize">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
           <horstretch>0</horstretch>
@@ -111,7 +142,7 @@ font-family: 'Helvetica Neue', sans-serif;
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="labelDelay">
         <property name="maximumSize">
          <size>
           <width>160</width>
@@ -124,7 +155,7 @@ font-family: 'Helvetica Neue', sans-serif;
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="spinBox">
+       <widget class="QSpinBox" name="spinBoxDelayms">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
           <horstretch>0</horstretch>
@@ -182,11 +213,17 @@ font-family: 'Helvetica Neue', sans-serif;
      </layout>
     </item>
     <item>
-     <layout class="QGridLayout" name="gridLayout_2"/>
+     <layout class="QGridLayout" name="gridLayout"/>
     </item>
    </layout>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>comboBoxPath</tabstop>
+  <tabstop>comboBoxMazes</tabstop>
+  <tabstop>checkBoxVisualize</tabstop>
+  <tabstop>spinBoxDelayms</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
