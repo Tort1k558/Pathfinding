@@ -17,6 +17,7 @@ Mouse:
 
 Keyboard:
 * F-Find the path
+* G-Generate maze
 * S-Set the starting point of the path
 * E-Put the end point of the path
 * C-Clear the entire field

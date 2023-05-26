@@ -1,13 +1,10 @@
-import itertools
 import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QSizePolicy
 from PyQt6.QtCore import Qt, QRect, QTimer
 from PyQt6.QtGui import QPainter, QCursor
-import mainwindow as mw
+import mainwindow
+import random
 
-
-# TODO
-# Size of windows
 
 class GridWidget(QWidget):
     def __init__(self, num_cells):
@@ -28,7 +25,8 @@ class GridWidget(QWidget):
         self.step_iter = None
         self.visualisation = False
         self.delay = 10
-        self.algorithm = 'BFS'
+        self.algorithm_path = 'BFS'
+        self.algorithm_maze = 'Randomized Prim\'s Algorithm'
 
         # init graph
         for i in range(self.num_cells):
@@ -37,6 +35,7 @@ class GridWidget(QWidget):
                 right = [i, k + 1]
                 down = [i - 1, k]
                 up = [i + 1, k]
+
                 # Exclusion of exit from borders
                 if left[0] < 0 or left[0] >= self.num_cells or left[1] < 0 or left[1] >= num_cells:
                     left = []
@@ -136,21 +135,23 @@ class GridWidget(QWidget):
             if len(self.start) == 2 and len(self.end) == 2:
                 if self.cells[self.start[0]][self.start[1]] == 'red' \
                         and self.cells[self.end[0]][self.end[1]] == 'green':
-                    if self.algorithm == 'BFS':
+                    if self.algorithm_path == 'BFS':
                         self.path = self.bfs(str(self.start[0]) + ',' + str(self.start[1]),
                                              str(self.end[0]) + ',' + str(self.end[1]))
-                    elif self.algorithm == 'DFS':
+                    elif self.algorithm_path == 'DFS':
                         self.path = self.dfs(str(self.start[0]) + ',' + str(self.start[1]),
                                              str(self.end[0]) + ',' + str(self.end[1]))
 
                     self.clear_path()
-                    if (len(self.all_steps) != 0 and self.visualisation):
+                    if len(self.all_steps) != 0 and self.visualisation:
                         self.timer.setInterval(self.delay)
                         self.timer.timeout.connect(self.paint_step)
                         self.step_iter = self.step_generator().__iter__()
                         self.timer.start()
                     else:
                         self.paint_path(self.path)
+        if event.key() == Qt.Key.Key_G:
+            self.generate_maze()
         # Clear and fill canvas
         if event.key() == Qt.Key.Key_C:
             self.clear_canvas()
@@ -276,12 +277,45 @@ class GridWidget(QWidget):
 
         return None
 
+    def generate_maze(self):
+        if self.algorithm_maze == 'Randomized Prim\'s Algorithm':
+            self.randomized_prim()
+
+    def randomized_prim(self):
+        self.fill_canvas()
+        start_x = random.randint(0, self.num_cells - 1)
+        start_y = random.randint(0, self.num_cells - 1)
+
+        frontier = [(start_x, start_y)]
+        while frontier:
+            current_x, current_y = random.choice(frontier)
+            neighbors = []
+
+            if current_x > 1:
+                neighbors.append((current_x - 2, current_y))
+            if current_x < self.num_cells - 2:
+                neighbors.append((current_x + 2, current_y))
+            if current_y > 1:
+                neighbors.append((current_x, current_y - 2))
+            if current_y < self.num_cells - 2:
+                neighbors.append((current_x, current_y + 2))
+
+            for neighbor_x, neighbor_y in neighbors:
+                if self.cells[neighbor_y][neighbor_x] == 'black':
+                    self.cells[neighbor_y][neighbor_x] = 'white'
+                    self.cells[current_y + (neighbor_y - current_y) // 2][
+                        current_x + (neighbor_x - current_x) // 2] = 'white'
+                    frontier.append((neighbor_x, neighbor_y))
+
+            frontier.remove((current_x, current_y))
+
+
 
 class MainWindow(QMainWindow):
     def __init__(self, num_cells):
         super().__init__()
         self.grid_widget = GridWidget(num_cells)
-        self.ui = mw.Ui_MainWindow()
+        self.ui = mainwindow.Ui_MainWindow()
         self.ui.setupUi(self)
 
         # set and setting grid widget
@@ -299,11 +333,12 @@ class MainWindow(QMainWindow):
         self.resize(self.minimumSize())
         self.setFixedSize(self.size())
 
-    def change_path_algorithm(self, index):
-        self.grid_widget.algorithm = self.ui.comboBoxPath.currentText()
+    def change_path_algorithm(self):
+        self.grid_widget.algorithm_path = self.ui.comboBoxPath.currentText()
 
-    def change_maze_algorithm(self, index):
-        pass
+    def change_maze_algorithm(self):
+        self.grid_widget.algorithm_maze = self.ui.comboBoxMazes.currentText()
+
     def change_visualization(self, state):
         self.grid_widget.visualisation = state
 
